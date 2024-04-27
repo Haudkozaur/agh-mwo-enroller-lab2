@@ -18,8 +18,10 @@ public class ParticipantRestController {
 	ParticipantService participantService;
 
 	@RequestMapping(value = "", method = RequestMethod.GET)
-	public ResponseEntity<?> getParticipants() {
-		Collection<Participant> participants = participantService.getAll();
+	public ResponseEntity<?> getParticipants(@RequestParam(value = "sortBy", defaultValue = "") String sortMode,
+											 @RequestParam(value = "sortOrder", defaultValue = "") String sortOrder,
+											 @RequestParam(value = "key", defaultValue = "") String login) {
+		Collection participants = participantService.getAll(login, sortMode, sortOrder);
 		return new ResponseEntity<Collection<Participant>>(participants, HttpStatus.OK);
 	}
 
@@ -29,18 +31,18 @@ public class ParticipantRestController {
 		if (participant == null) {
 			return new ResponseEntity(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Participant>(participant, HttpStatus.OK);
+		return new ResponseEntity(participant, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	public ResponseEntity<?> addParticipant(@RequestBody Participant participant) {
 		if (participantService.findByLogin(participant.getLogin()) != null) {
-			return new ResponseEntity<String>(
+			return new ResponseEntity(
 					"Unable to create. A participant with login " + participant.getLogin() + " already exist.",
 					HttpStatus.CONFLICT);
 		}
 		participantService.add(participant);
-		return new ResponseEntity<Participant>(participant, HttpStatus.CREATED);
+		return new ResponseEntity(participant, HttpStatus.CREATED);
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
@@ -50,7 +52,7 @@ public class ParticipantRestController {
 			return new ResponseEntity(HttpStatus.NOT_FOUND);
 		}
 		participantService.delete(participant);
-		return new ResponseEntity<Participant>(HttpStatus.OK);
+		return new ResponseEntity(HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
@@ -61,7 +63,7 @@ public class ParticipantRestController {
 		}
 		participant.setPassword(updatedParticipant.getPassword());
 		participantService.update(participant);
-		return new ResponseEntity<Participant>(HttpStatus.OK);
+		return new ResponseEntity(HttpStatus.OK);
 	}
 
 }
